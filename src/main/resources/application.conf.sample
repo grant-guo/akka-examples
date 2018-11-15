@@ -1,0 +1,88 @@
+
+grant.guo.akka.examples {
+  akka.actor {
+    debug {
+      # enable function of LoggingReceive, which is to log any received message at
+      receive = off
+      # enable DEBUG logging of all AutoReceiveMessages (Kill, PoisonPill et.c.)
+      autoreceive = off
+      # enable DEBUG logging of actor lifecycle changes
+      lifecycle = off
+      # enable DEBUG logging of all LoggingFSMs for events, transitions and timers
+      fsm = off
+      # enable DEBUG logging of subscription changes on the eventStream
+      event-stream = off
+    }
+    priority-dispatcher {
+      mailbox-type =
+        "common.PriorityActorMailBox"
+    }
+
+    default-dispatcher {
+      # Dispatcher is the name of the event-based dispatcher
+      type = Dispatcher
+      # What kind of ExecutionService to use
+      executor = "fork-join-executor"
+      # Configuration for the fork join pool
+      fork-join-executor {
+        # Min number of threads to cap factor-based parallelism number to
+        parallelism-min = 2
+        # Parallelism (threads) ... ceil(available processors * factor)
+        parallelism-factor = 8.0
+        # Max number of threads to cap factor-based parallelism number to
+        parallelism-max = 8
+      }
+      # Throughput defines the maximum number of messages to be
+      # processed per actor before the thread jumps to the next actor.
+      # Set to 1 for as fair as possible.
+      throughput = 100
+    }
+
+    blocking-dispatcher {
+      type = Dispatcher
+      executor = "thread-pool-executor"
+      thread-pool-executor {
+        fixed-pool-size = 2
+      }
+    }
+
+    bounded-mailbox {
+      mailbox-type = "akka.dispatch.BoundedMailbox"
+      mailbox-capacity = 500
+      mailbox-push-timeout-time = 10 milliseconds
+    }
+
+  }
+
+  https{
+    keystore_type = "JKS"
+    keystore_url = ""
+    keystore_password = ""
+    bind_ip = "0.0.0.0" // bind to all interfaces
+    bind_port = 9999
+  }
+
+  authentication {
+    ldap {
+      host = ""
+      port = 0
+      basedn = "DC=???,DC=???"
+      userdn_patterns = ["CN=$,OU=???"] // here "$" will be replaced by the username
+      group_attribute_key = "memberOf" // in Microsoft "active directory", "memberOf" is the default key for retrieving the group data
+
+      // "ssl" configuration is optional. if absent, the normal non-ssl connection will be set up
+      ssl {
+        server_certificate_url = ""
+        port = 636 //optional, if absent, the default value is 636
+      }
+    }
+  }
+
+  // used by "example" module to load the test data
+  examples{
+    ldap{
+      username = ""
+      password = ""
+    }
+  }
+}
